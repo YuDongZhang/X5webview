@@ -27,7 +27,7 @@ public class FileOpenActivity extends FragmentActivity {
     }
 
     private void openFile() {
-        String url = "/sdcard/jiangsuDownload/abcd.xls";
+        String url = Environment.getExternalStorageDirectory().getPath()+"/XueXiPingTai/001.pdf";
         File file = new File(url);
         if (!file.exists()) {
             Toast.makeText(this, "文件不存在", Toast.LENGTH_LONG).show();
