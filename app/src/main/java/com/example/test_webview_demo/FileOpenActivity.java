@@ -1,20 +1,26 @@
 package com.example.test_webview_demo;
 
+import android.nfc.Tag;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.example.test_webview_demo.utils.LogUtil;
 import com.tencent.smtt.sdk.TbsReaderView;
 
 import java.io.File;
+import java.lang.reflect.Type;
 
 public class FileOpenActivity extends FragmentActivity {
 
     private TbsReaderView tbsReaderView;
+    private boolean result;
+    private String url;
+    private boolean isOpenFail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +33,7 @@ public class FileOpenActivity extends FragmentActivity {
     }
 
     private void openFile() {
-        String url = Environment.getExternalStorageDirectory().getPath()+"/XueXiPingTai/001.pdf";
+         url = Environment.getExternalStorageDirectory().getPath()+"/XueXiPingTai/001.pdf";
         File file = new File(url);
         if (!file.exists()) {
             Toast.makeText(this, "文件不存在", Toast.LENGTH_LONG).show();
@@ -35,7 +41,7 @@ public class FileOpenActivity extends FragmentActivity {
         Bundle bundle = new Bundle();
         bundle.putString("filePath", url);
         bundle.putString("tempPath", Environment.getExternalStorageDirectory().getPath());
-        boolean result = tbsReaderView.preOpen(parseFormat(parseName(url)), false);
+         result = tbsReaderView.preOpen(parseFormat(parseName(url)), false);
         if (result) {
             tbsReaderView.openFile(bundle);
         }
@@ -60,9 +66,27 @@ public class FileOpenActivity extends FragmentActivity {
     TbsReaderView.ReaderCallback readerCallback = new TbsReaderView.ReaderCallback() {
         @Override
         public void onCallBackAction(Integer integer, Object o, Object o1) {
-
+            LogUtil.d("xxx","integer "+integer+"  o  "+ o +" o1 "+o1);
+            if (o!=null){
+                if (30002==(Integer) o){
+                    LogUtil.d("xxx","这里可以证明无效了");
+                    isOpenFail = true;
+                }
+            }
         }
     };
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        tbsReaderView.onStop();
+        if(isOpenFail){
+            File file = new File(url);
+            if (file.exists()&&file.isFile()){
+                file.delete();
+                LogUtil.d("xxx",file.delete()+"");
+            }
+        }
 
+    }
 }
